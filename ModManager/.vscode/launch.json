@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Run run-debug.bat",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}\\.vscode\\run-debug.bat",
+            "args": []
+        },
+        {
+            "name": "Run run-release.bat",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}\\.vscode\\run-release.bat",
+            "args": []
+        }
+    ]
+}

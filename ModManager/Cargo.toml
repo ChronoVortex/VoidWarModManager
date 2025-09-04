@@ -1,0 +1,46 @@
+[package]
+name = "modman"
+version = "0.1.0"
+edition = "2024"
+
+# Fork of bevy to apply viewport minimization fix from #18916.
+[workspace.dependencies]
+bevy = { git = "https://github.com/ChronoVortex/bevy.git", branch = "release-0.16.1" }
+bevy_image_font = { git = "https://github.com/ChronoVortex/bevy_image_font.git", branch = "histrion-integration" }
+
+# Replace bevy dependency in all other dependencies with the fork.
+[replace]
+"bevy:0.16.1" = { git = "https://github.com/ChronoVortex/bevy.git", branch = "release-0.16.1" }
+
+[dependencies]
+bevy = { workspace = true, features = [ "wav" ] }
+bevy-histrion-packer = "0.6.0"
+bevy_image_font = { workspace = true }
+directories = "6.0.0"
+image = "0.25.6"
+libloading = "0.8.8"
+serde = "1.0.219"
+serde-this-or-that = "0.5.0"
+serde_json = "1.0.143"
+windows-icons = "0.3.0"
+winit = "0.30.12"
+
+[build-dependencies]
+winresource = "0.1.23"
+copy_to_output = "2.2.0"
+bevy-histrion-packer = "0.6.0"
+bevy = { workspace = true, features = [
+  "asset_processor",
+  "file_watcher",
+  "embedded_watcher",
+  "wav"
+] }
+bevy_image_font = { workspace = true }
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+opt-level = 1
+
+# Enable a large amount of optimization in the dev profile for dependencies.
+[profile.dev.package."*"]
+opt-level = 3
