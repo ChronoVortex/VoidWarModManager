@@ -1,7 +1,7 @@
 use std::fs;
 use bevy::prelude::*;
 use crate::{
-    PreloadedAssets,
+    PreloadedAssets, log::LogManager,
     buttons::{button_large_bundle, confirm_popup_bundle, MainButton, ConfirmPopup},
     util::{local_path, appdata_path}
 };
@@ -59,7 +59,7 @@ pub fn button_backup_step(
             meshes.add(Rectangle::new(1280., 720.)),
             materials.add(Color::srgba(0., 0., 0., 0.96)),
             assets.get_image("spr_confirmBox"),
-            "Are you sure? You should only\ndo this on a fresh installation!",
+            "Are you sure? You should only do this on a fresh\ninstallation with only the mod manager installed!",
             assets.get_font("dubellay"),
             dimensions.as_vec2(),
             assets.get_audio("buttonLarge_doubleClick_SmartSoundFX_v2"),
@@ -75,6 +75,7 @@ pub fn button_backup_confirm_step(
     mut commands: Commands,
     button: Single<&MainButton, With<BackupButtonConfirm>>,
     mut buttons_other: Query<&mut MainButton, Without<BackupButtonConfirm>>,
+    mut log_man: Single<&mut LogManager>,
     popup: Single<Entity, With<ConfirmPopup>>
 ) {
     if button.just_pressed {
@@ -86,6 +87,9 @@ pub fn button_backup_confirm_step(
             local_path("data.win"), 
             appdata_path("Void_War\\.DATA_BAK\\data.win")
         ).expect("Unable to create backup");
+
+        // Log the backup
+        log_man.log("Created new data.win backup".to_string(), None);
 
         // Enable all buttons
         for mut button_other in &mut buttons_other {
