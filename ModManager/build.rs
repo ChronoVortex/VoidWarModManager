@@ -70,14 +70,11 @@ fn main() -> io::Result<()> {
     )
     .unwrap();
 
-    // Copy packed assets to target build folder
-    copy_to_output("data.hpak", &env::var("PROFILE").unwrap()).expect("Could not copy game data to output folder");
-
-    // // Copy assets folder to build folder
-    // copy_to_output("assets", &env::var("PROFILE").unwrap()).expect("Could not copy assets to output folder");
-
-    // Copy dummy Void War executable to build folder (for reading icon)
-    copy_to_output("Void War.exe", &env::var("PROFILE").unwrap()).expect("Could not copy VW executable to output folder");
+    // Copy necessary files to build folder
+    let target_dir = env::var("PROFILE").unwrap();
+    copy_to_output("data.hpak", &target_dir).expect("Could not copy game data to output folder");
+    copy_to_output("Void War.exe", &target_dir).expect("Could not copy VW executable to output folder");
+    copy_to_output("data.win", &target_dir).expect("Could not copy data.win to output folder");
 
     Ok(())
 }
