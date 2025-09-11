@@ -74,14 +74,13 @@ fn initialize(
     mut commands: Commands,
     mut next_state: ResMut<NextState<AppState>>,
     asset_server: Res<AssetServer>,
-    main_window: Query<Entity, With<PrimaryWindow>>,
+    main_window: Single<Entity, With<PrimaryWindow>>,
     windows: NonSend<WinitWindows>,
     settings: Res<Settings>
 ) {
     // Get primary window
     let primary =
-        windows.get_window(main_window.single()
-        .expect("Unable to get main window"))
+        windows.get_window(main_window.entity())
         .expect("Unable to get Windows data for application");
     
     // Set window boarder visibility
