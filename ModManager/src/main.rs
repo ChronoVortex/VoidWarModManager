@@ -240,6 +240,6 @@ fn main() {
         )
         .init_state::<AppState>()
         .add_plugins(ImageFontPlugin)
-        .add_plugins((CameraPlugin, CursorPlugin, ButtonsPlugin, LogPlugin))
+        .add_plugins((CameraPlugin, CursorPlugin, LogPlugin, ButtonsPlugin))
         .run();
 }

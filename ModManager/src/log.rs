@@ -8,18 +8,19 @@ use crate::{PreloadedAssets, AppState};
 
 #[derive(Component)]
 pub struct LogManager {
-    strings: VecDeque<(String, Color)>,
+    pub strings: Vec<String>,
+    strings_queue: VecDeque<(String, Color)>,
     pos_x: f32,
     pos_y: f32,
     pos_y_start: f32,
     pos_y_end: f32,
     spacing: f32
-
 }
 impl LogManager {
     fn new(pos_x: f32, pos_y: f32, spacing: f32, height: f32) -> Self {
         LogManager {
-            strings: VecDeque::new(),
+            strings: Vec::new(),
+            strings_queue: VecDeque::new(),
             pos_x: pos_x,
             pos_y: pos_y,
             pos_y_start: pos_y,
@@ -29,7 +30,8 @@ impl LogManager {
     }
 
     pub fn log(&mut self, string: String, color: Option<Color>) {
-        self.strings.push_back((
+        self.strings.push(string.clone());
+        self.strings_queue.push_back((
             string,
             color.unwrap_or(Color::srgb_u8(155, 153, 139))
         ));
@@ -51,16 +53,16 @@ fn log_step(
     mut commands: Commands,
     assets: Res<PreloadedAssets>
 ) {
-    if !log_man.strings.is_empty() {
+    if !log_man.strings_queue.is_empty() {
         // Determine how far the texts need to be scrolled up to make space for new lines
-        let new_log_height: f32 = log_man.pos_y_start - log_man.pos_y + (log_man.strings.len() as f32)*log_man.spacing;
+        let new_log_height: f32 = log_man.pos_y_start - log_man.pos_y + (log_man.strings_queue.len() as f32)*log_man.spacing;
         let max_log_height: f32 = log_man.pos_y_start - log_man.pos_y_end;
         let scroll_text: f32 = (new_log_height - max_log_height).max(0.);
 
         // Spawn new texts
         let mut pos_y = log_man.pos_y + scroll_text;
-        while !log_man.strings.is_empty() {
-            let string_data = log_man.strings.pop_front().unwrap();
+        while !log_man.strings_queue.is_empty() {
+            let string_data = log_man.strings_queue.pop_front().unwrap();
             commands.spawn((
                 LogText,
                 ImageFontSpriteText::default()
