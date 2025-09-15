@@ -1,8 +1,7 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, color::palettes::basic::RED};
+use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 use crate::{
-    PreloadedAssets,
-    buttons::{button_large_bundle, confirm_popup_bundle, MainButton},
-    util::{local_path, run_program}
+    buttons::{button_large_bundle, confirm_popup_bundle, MainButton}, log::LogManager, util::{local_path, run_program}, PreloadedAssets
 };
 
 #[derive(Component)]
@@ -72,10 +71,31 @@ pub fn button_return_step(
 
 pub fn button_return_confirm_step(
     button: Single<&MainButton, With<ReturnButtonConfirm>>,
-    mut app_exit_events: ResMut<Events<bevy::app::AppExit>>
+    mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
+    mut log_man: Single<&mut LogManager>
 ) {
     if button.just_pressed {
-        run_program(local_path("Void War.exe").as_str());
-        app_exit_events.send(AppExit::Success);
+        let mut run_success = false;
+
+        // Try running the game from Steam
+        // NOTE: This method will not work if the user has Steam but doesn't have the Steam release of VW
+        if let Ok(steam_reg) = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Wow6432Node\\Valve\\Steam")
+        && let Ok(steam_dir) = steam_reg.get_value::<String, &str>("InstallPath") {
+            let mut run_cmd = String::from("\"");
+            run_cmd.push_str(steam_dir.as_str());
+            run_cmd.push_str("\\steam.exe\" -applaunch 2853590"); // VW's ID
+            run_success = run_program(run_cmd.as_str());
+        }
+
+        // Try running the game from the local executable
+        if !run_success {
+            run_success = run_program(local_path("Void War.exe").as_str());
+        }
+        
+        if run_success {
+            app_exit_events.send(AppExit::Success);
+        } else {
+            log_man.log("Unable to return to game!".to_string(), Some(RED.into()));
+        }
     }
 }
