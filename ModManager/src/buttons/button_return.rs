@@ -78,9 +78,9 @@ pub fn button_return_confirm_step(
         let mut run_success = false;
 
         // Try running the game from Steam
-        // NOTE: This method will not work if the user has Steam but doesn't have the Steam release of VW
         if let Ok(steam_reg) = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey("SOFTWARE\\Wow6432Node\\Valve\\Steam")
-        && let Ok(steam_dir) = steam_reg.get_value::<String, &str>("InstallPath") {
+        && let Ok(steam_dir) = steam_reg.get_value::<String, &str>("InstallPath")
+        && local_path("").starts_with(steam_dir.as_str()) { // Make sure this mod manager instance is running from the steam directory
             let mut run_cmd = String::from("\"");
             run_cmd.push_str(steam_dir.as_str());
             run_cmd.push_str("\\steam.exe\" -applaunch 2853590"); // VW's ID
