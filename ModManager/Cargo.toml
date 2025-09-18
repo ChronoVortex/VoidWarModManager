@@ -26,6 +26,7 @@ windows-icons = "0.3.0"
 winit = "0.30.12"
 rfd = "0.15.4"
 winreg = "0.55.0"
+bevy_file_asset = "0.2.0"
 
 [build-dependencies]
 winresource = "0.1.23"

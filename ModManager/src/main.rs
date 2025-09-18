@@ -1,10 +1,17 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    audio::{PlaybackMode, Volume}, color::palettes::basic::BLACK, image::ImageSampler, prelude::*, window::{CursorOptions, PrimaryWindow, WindowMode, WindowResolution, WindowTheme}, winit::WinitWindows
+    asset::UnapprovedPathMode,
+    audio::{PlaybackMode, Volume},
+    color::palettes::basic::BLACK,
+    image::ImageSampler,
+    prelude::*,
+    window::{CursorOptions, PrimaryWindow, WindowMode, WindowResolution, WindowTheme},
+    winit::WinitWindows
 };
 use bevy_image_font::{loader::ImageFontLoaderSettings, ImageFont, ImageFontPlugin};
 use bevy_histrion_packer::{HistrionPackerPlugin, HistrionPackerMode};
+use bevy_file_asset::FileAssetPlugin;
 use winit::window::Icon;
 use windows_icons::get_icon_by_path;
 use std::collections::HashMap;
@@ -41,7 +48,6 @@ pub struct PreloadedAssets {
     pub fonts: HashMap<String, Handle<Font>>,
     pub image_fonts: HashMap<String, Handle<ImageFont>>
 }
-
 impl PreloadedAssets {
     fn new() -> PreloadedAssets {
         PreloadedAssets {
@@ -122,6 +128,34 @@ fn initialize(
     assets.images.insert(
         "spr_confirmBox".to_string(), 
         asset_server.load("hpak://img/spr_confirmBox.png")
+    );
+    assets.images.insert(
+        "spr_buttonScrollDown".to_string(), 
+        asset_server.load("hpak://img/spr_buttonScrollDown.png")
+    );
+    assets.images.insert(
+        "spr_buttonScrollUp".to_string(), 
+        asset_server.load("hpak://img/spr_buttonScrollUp.png")
+    );
+    assets.images.insert(
+        "spr_buttonScroll".to_string(), 
+        asset_server.load("hpak://img/spr_buttonScroll.png")
+    );
+    assets.images.insert(
+        "spr_modButton_up".to_string(), 
+        asset_server.load("hpak://img/spr_modButton_up.png")
+    );
+    assets.images.insert(
+        "spr_modButton_down".to_string(), 
+        asset_server.load("hpak://img/spr_modButton_down.png")
+    );
+    assets.images.insert(
+        "spr_modButton_toggle".to_string(), 
+        asset_server.load("hpak://img/spr_modButton_toggle.png")
+    );
+    assets.images.insert(
+        "spr_modFrame".to_string(), 
+        asset_server.load("hpak://img/spr_modFrame.png")
     );
     assets.audio.insert(
         "buttonLarge_doubleClick_SmartSoundFX_v2".to_string(),
@@ -227,16 +261,25 @@ fn main() {
         .insert_resource(ClearColor(BLACK.into()))
         .insert_resource(settings)
         .add_systems(Startup, initialize)
-        .add_plugins(HistrionPackerPlugin {
-            source: "data.hpak".to_string(),
-            mode: HistrionPackerMode::Autoload("hpak"),
-        })
+        .add_plugins((
+            HistrionPackerPlugin {
+                source: "data.hpak".to_string(),
+                mode: HistrionPackerMode::Autoload("hpak"),
+            },
+            FileAssetPlugin
+        ))
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
                 primary_window: app_window,
                 ..default()
             })
             .set(image_plugin)
+            // Needed to use FileAssetPlugin's asset source
+            // Dicey for applications which support mods but since this is the modding tool itself it should be fine
+            .set(AssetPlugin {
+                unapproved_path_mode: UnapprovedPathMode::Allow,
+                ..default()
+            })
         )
         .init_state::<AppState>()
         .add_plugins(ImageFontPlugin)
