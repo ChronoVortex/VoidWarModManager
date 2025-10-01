@@ -1,0 +1,144 @@
+use std::fs;
+use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
+use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
+use serde::Deserialize;
+use image::image_dimensions;
+use crate::{AppState, PreloadedAssets, util::appdata_path};
+
+#[derive(Deserialize)]
+#[serde(default)]
+struct ModInfo {
+    title: String,
+    version_major: u32,
+    version_minor: u32,
+    version_patch: u32,
+    authors: Vec<String>,
+    description: String
+}
+impl Default for ModInfo {
+    fn default() -> Self {
+        ModInfo {
+            title: "".to_string(),
+            version_major: 0,
+            version_minor: 0,
+            version_patch: 0,
+            authors: vec!["Unknown".to_string()],
+            description: "No description provided.".to_string()
+        }
+    }
+}
+
+fn load_mods(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<AppState>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>,
+    assets: Res<PreloadedAssets>
+) {
+    let mods_dir = appdata_path("Void_War\\mods");
+    if fs::exists(mods_dir.clone()).expect("Unable to check for mods folder") {
+        // Walk through each folder in the mods folder
+        for mod_dir_entry in fs::read_dir(mods_dir).expect("Unable to read mods folder") {
+            let mod_dir = mod_dir_entry.unwrap();
+            if mod_dir.file_type().unwrap().is_dir() {
+                let mod_path = String::from(mod_dir.path().as_path().to_str().unwrap());
+
+                // Ensure the folder has a project file
+                if fs::exists(mod_path.clone() + "\\project.json").expect("Unable to check for project file") {
+                    // Check if the mod preview image exists and is the correct size, otherwise use the missing preview icon
+                    let preview_path = mod_path.clone() + "\\preview.png";
+                    let preview_sprite =
+                        if let Ok(preview_size) = image_dimensions(preview_path.clone()) && preview_size.0 <= 168 && preview_size.1 <= 120
+                        { Sprite::from_image(asset_server.load(String::from("file://") + preview_path.as_str())) } else
+                        { Sprite::from_image(assets.get_image("spr_missing")) };
+                    
+                    // Load metadata
+                    let mut metadata = 
+                        if let Ok(metadata_str) = fs::read_to_string(mod_path.clone() + "\\metadata.json")
+                        && let Ok(metadata_res) = serde_json::from_str::<ModInfo>(&metadata_str) {
+                            metadata_res
+                        } else {
+                            ModInfo::default()
+                        };
+                    if metadata.title.is_empty() {
+                        metadata.title = String::from(mod_dir.path().as_path().file_name().unwrap().to_str().unwrap());
+                    }
+
+                    // Create the mod entry
+                    // TODO: add mod marker with directory info, add buttons, implement ordering functionality
+                    let text_color_light = Color::srgb_u8(155, 153, 139);
+                    let text_color_dark = Color::srgb_u8(64, 64, 64);
+                    commands.spawn((
+                        Transform::from_xyz(146., 206., -100.),
+                        Visibility::default(),
+                        children![(
+                            // Preview image
+                            preview_sprite,
+                            Transform::from_xyz(-302., 0., 0.)
+                        ), (
+                            // Preview frame
+                            Sprite::from_image(assets.get_image("spr_modFrame")),
+                            Transform::from_xyz(-302., 0., 1.)
+                        ), (
+                            // Title text
+                            Text2d::new(metadata.title),
+                            TextFont {
+                                font: assets.get_font("dubellay"),
+                                font_size: 16.,
+                                ..default()
+                            },
+                            TextColor(text_color_light.clone()),
+                            TextBounds::new(620., 20.),
+                            Anchor::TopLeft,
+                            Transform::from_xyz(-205., 53., 0.)
+                        ), (
+                            // Version and authors text
+                            ImageFontSpriteText::default()
+                                .color(text_color_dark)
+                                .letter_spacing(LetterSpacing::Pixel(1))
+                                .anchor(Anchor::TopLeft),
+                            ImageFontText::default()
+                                .text(format!(
+                                    "VERSION: {}.{}.{}   AUTHORS: {}",
+                                    metadata.version_major,
+                                    metadata.version_minor,
+                                    metadata.version_patch,
+                                    metadata.authors.join(", ")
+                                ))
+                                .font(assets.get_image_font("pixel_font")),
+                            Transform::from_xyz(-205., 29., 0.)
+                        ), (
+                            // Horizontal rule
+                            Mesh2d(meshes.add(Rectangle::new(620., 1.))),
+                            MeshMaterial2d(materials.add(text_color_light.clone())),
+                            Transform::from_xyz(105., 11., 0.)
+                        ), (
+                            // Description
+                            Text2d::new(metadata.description),
+                            TextFont {
+                                font: assets.get_font("dubellay"),
+                                font_size: 16.,
+                                ..default()
+                            },
+                            TextColor(text_color_light),
+                            TextBounds::new(620., 60.),
+                            Anchor::TopLeft,
+                            Transform::from_xyz(-205., 2., 0.)
+                        )]
+                    ));
+                }
+            }
+        }
+    } else {
+        fs::create_dir(appdata_path("Void_War\\mods")).expect("Unable to create mods folder");
+    }
+    next_state.set(AppState::Running);
+}
+
+pub struct ModsPlugin;
+impl Plugin for ModsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(AppState::LoadingMods), load_mods);
+    }
+}

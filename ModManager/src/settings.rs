@@ -35,6 +35,6 @@ pub struct SettingsRes {
 pub fn get_settings() -> Settings {
     let mut json_data = fs::read_to_string(appdata_path("Void_War\\profile.sav")).expect("Unable to open Void War profile");
     json_data.truncate(json_data.rfind('}').unwrap() + 1); // VW can save the profile with a NUL at the end, we need to account for this
-    let settings_wrapper: SettingsWrapper = serde_json::from_str(&json_data).expect("Unable to read Void War profile");
+    let settings_wrapper = serde_json::from_str::<SettingsWrapper>(&json_data).expect("Unable to read Void War profile");
     return settings_wrapper.saved_settings;
 }

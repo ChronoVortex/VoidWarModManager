@@ -34,11 +34,15 @@ use crate::buttons::ButtonsPlugin;
 mod log;
 use crate::log::LogPlugin;
 
+mod mods;
+use crate::mods::ModsPlugin;
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum AppState {
     #[default]
     Loading,
-    Running,
+    LoadingMods,
+    Running
 }
 
 #[derive(Resource)]
@@ -157,6 +161,10 @@ fn initialize(
         "spr_modFrame".to_string(), 
         asset_server.load("hpak://img/spr_modFrame.png")
     );
+    assets.images.insert(
+        "spr_missing".to_string(), 
+        asset_server.load("hpak://img/spr_missing.png")
+    );
     assets.audio.insert(
         "buttonLarge_doubleClick_SmartSoundFX_v2".to_string(),
         asset_server.load("hpak://snd/buttonLarge_doubleClick_SmartSoundFX_v2.wav")
@@ -227,7 +235,7 @@ fn initialize(
     // Transition to running state
     // Use OnExit(AppState::Loading) schedule for any startup
     // systems that depend on assets initialized here
-    next_state.set(AppState::Running);
+    next_state.set(AppState::LoadingMods);
 }
 
 fn main() {
@@ -283,6 +291,6 @@ fn main() {
         )
         .init_state::<AppState>()
         .add_plugins(ImageFontPlugin)
-        .add_plugins((CameraPlugin, CursorPlugin, LogPlugin, ButtonsPlugin))
+        .add_plugins((CameraPlugin, CursorPlugin, LogPlugin, ButtonsPlugin, ModsPlugin))
         .run();
 }
