@@ -69,6 +69,9 @@ fn load_mods(
                     // TODO: add mod marker with directory info, add buttons, implement ordering functionality
                     let text_color_light = Color::srgb_u8(155, 153, 139);
                     let text_color_dark = Color::srgb_u8(64, 64, 64);
+                    let text_start_x: f32 = -205.;
+                    let text_start_y: f32 = 53.;
+                    let text_width: f32 = 620.;
                     commands.spawn((
                         Transform::from_xyz(146., 206., -100.),
                         Visibility::default(),
@@ -89,9 +92,9 @@ fn load_mods(
                                 ..default()
                             },
                             TextColor(text_color_light.clone()),
-                            TextBounds::new(620., 20.),
+                            TextBounds::new(text_width, 20.),
                             Anchor::TopLeft,
-                            Transform::from_xyz(-205., 53., 0.)
+                            Transform::from_xyz(text_start_x, text_start_y, 0.)
                         ), (
                             // Version and authors text
                             ImageFontSpriteText::default()
@@ -107,12 +110,12 @@ fn load_mods(
                                     metadata.authors.join(", ")
                                 ))
                                 .font(assets.get_image_font("pixel_font")),
-                            Transform::from_xyz(-205., 29., 0.)
+                            Transform::from_xyz(text_start_x, text_start_y - 24., 0.)
                         ), (
                             // Horizontal rule
-                            Mesh2d(meshes.add(Rectangle::new(620., 1.))),
+                            Mesh2d(meshes.add(Rectangle::new(text_width, 1.))),
                             MeshMaterial2d(materials.add(text_color_light.clone())),
-                            Transform::from_xyz(105., 11., 0.)
+                            Transform::from_xyz(text_start_x + text_width/2., text_start_y - 42., 0.)
                         ), (
                             // Description
                             Text2d::new(metadata.description),
@@ -122,9 +125,9 @@ fn load_mods(
                                 ..default()
                             },
                             TextColor(text_color_light),
-                            TextBounds::new(620., 60.),
+                            TextBounds::new(text_width, 60.),
                             Anchor::TopLeft,
-                            Transform::from_xyz(-205., 2., 0.)
+                            Transform::from_xyz(text_start_x, text_start_y - 51., 0.)
                         )]
                     ));
                 }
