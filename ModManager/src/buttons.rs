@@ -212,7 +212,7 @@ pub fn confirm_popup_bundle(
 
 fn button_step(
     mut commands: Commands,
-    mut button_query: Query<(&mut MainButton, &mut Sprite, &Transform)>,
+    mut button_query: Query<(&mut MainButton, &mut Sprite, &GlobalTransform)>,
     cursor: Single<&Cursor>,
     mouse: Res<ButtonInput<MouseButton>>,
     settings: Res<Settings>
@@ -233,9 +233,9 @@ fn button_step(
         if button.active {
             // Get the bounding box of the button's sprite
             let image_size = button.size;
-            let scaled = image_size*transform.scale.truncate();
+            let scaled = image_size*transform.scale().truncate();
             let bounding_box =
-                Rect::from_center_size(transform.translation.truncate(), scaled);
+                Rect::from_center_size(transform.translation().truncate(), scaled);
 
             // Check if the cursor position is in the bounding box
             if bounding_box.contains(cursor.pos) {

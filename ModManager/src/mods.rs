@@ -79,7 +79,7 @@ fn load_mods(
                     }
 
                     // Create the mod entry
-                    // TODO: fix button_step system not working on button children, implement ordering functionality
+                    // TODO: implement ordering functionality
                     let dimensions_toggle = UVec2::new(16, 16);
                     let layout_toggle = TextureAtlasLayout::from_grid(dimensions_toggle, 2, 1, None, None);
                     let texture_atlas_layout_toggle = texture_atlas_layouts.add(layout_toggle);
