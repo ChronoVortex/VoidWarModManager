@@ -33,18 +33,22 @@ mod button_export;
 use crate::buttons::button_export::{button_export_init, button_export_step};
 
 #[derive(Component)]
-struct MainButton {
-    pub size: Vec2,
-    pub sound: Handle<AudioSource>,
+pub struct MainButton {
+    size: Vec2,
+    sound: Handle<AudioSource>,
+    toggle: bool,
+    pub toggle_on: bool,
     pub pressed: bool,
     pub just_pressed: bool,
     pub active: bool
 }
 impl MainButton {
-    fn new(size: Vec2, sound: Handle<AudioSource>) -> Self {
+    pub fn new(size: Vec2, sound: Handle<AudioSource>, toggle: bool) -> Self {
         MainButton {
             size: size,
             sound: sound,
+            toggle: toggle,
+            toggle_on: false,
             pressed: false,
             just_pressed: false,
             active: true
@@ -52,11 +56,34 @@ impl MainButton {
     }
 }
 
-fn button_large_bundle(
+pub fn button_bundle(
     pos_x: f32,
     pos_y: f32,
     pos_z: f32,
-    dimensions: Vec2,
+    toggle: bool,
+    size: Vec2,
+    sound: Handle<AudioSource>,
+    texture: Handle<Image>,
+    texture_atlas_layout: Handle<TextureAtlasLayout>
+) -> impl Bundle {
+    (
+        MainButton::new(size, sound, toggle),
+        Sprite::from_atlas_image(
+            texture,
+            TextureAtlas {
+                layout: texture_atlas_layout,
+                index: 0,
+            },
+        ),
+        Transform::from_xyz(pos_x, pos_y, pos_z)
+    )
+}
+
+pub fn button_large_bundle(
+    pos_x: f32,
+    pos_y: f32,
+    pos_z: f32,
+    size: Vec2,
     sound: Handle<AudioSource>,
     texture: Handle<Image>,
     texture_atlas_layout: Handle<TextureAtlasLayout>,
@@ -65,10 +92,7 @@ fn button_large_bundle(
     font_size: Option<f32>
 ) -> impl Bundle {
     (
-        MainButton::new(
-            dimensions,
-            sound
-        ),
+        MainButton::new(size, sound, false),
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -76,6 +100,7 @@ fn button_large_bundle(
                 index: 0,
             },
         ),
+        Transform::from_xyz(pos_x, pos_y, pos_z),
         Text2d::new(text),
         TextFont {
             font: font,
@@ -83,16 +108,15 @@ fn button_large_bundle(
             ..default()
         },
         TextColor(BLACK.into()),
-        TextLayout::new_with_justify(JustifyText::Center),
-        Transform::from_xyz(pos_x, pos_y, pos_z)
+        TextLayout::new_with_justify(JustifyText::Center)
     )
 }
 
-fn button_small_bundle(
+pub fn button_small_bundle(
     pos_x: f32,
     pos_y: f32,
     pos_z: f32,
-    dimensions: Vec2,
+    size: Vec2,
     sound: Handle<AudioSource>,
     texture: Handle<Image>,
     texture_atlas_layout: Handle<TextureAtlasLayout>,
@@ -100,10 +124,7 @@ fn button_small_bundle(
     font: Handle<ImageFont>
 ) -> impl Bundle {
     (
-        MainButton::new(
-            dimensions,
-            sound
-        ),
+        MainButton::new(size, sound, false),
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -130,7 +151,7 @@ struct CancelButton;
 #[derive(Component)]
 struct ConfirmPopup;
 
-fn confirm_popup_bundle(
+pub fn confirm_popup_bundle(
     bg: Handle<Mesh>,
     bg_material: Handle<ColorMaterial>,
     texture: Handle<Image>,
@@ -200,10 +221,13 @@ fn button_step(
         let atlas = sprite.texture_atlas.get_or_insert_default();
 
         // Reset state before executing logic
-        atlas.index = 0;
         button.just_pressed = false;
         if !(button.active && mouse.pressed(MouseButton::Left))  {
             button.pressed = false;
+        }
+        if !button.toggle {
+            // Show base sprite by default for non-toggles
+            atlas.index = 0;
         }
         
         if button.active {
@@ -215,13 +239,20 @@ fn button_step(
 
             // Check if the cursor position is in the bounding box
             if bounding_box.contains(cursor.pos) {
-                // Show hover frame
-                atlas.index = 1;
+                if !button.toggle {
+                    // Show hover sprite for non-toggles
+                    atlas.index = 1;
+                }
                 
                 if mouse.just_pressed(MouseButton::Left) {
                     // Mark button as pressed
                     button.pressed = true;
                     button.just_pressed = true;
+                    if button.toggle {
+                        // Toggle if this button is a toggle
+                        button.toggle_on = !button.toggle_on;
+                        atlas.index = 1 - atlas.index;
+                    }
 
                     // Play press sound
                     commands.spawn((

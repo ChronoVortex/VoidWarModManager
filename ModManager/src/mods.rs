@@ -3,7 +3,7 @@ use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
 use serde::Deserialize;
 use image::image_dimensions;
-use crate::{AppState, PreloadedAssets, util::appdata_path};
+use crate::{AppState, PreloadedAssets, buttons::button_bundle, util::appdata_path};
 
 #[derive(Deserialize)]
 #[serde(default)]
@@ -28,11 +28,24 @@ impl Default for ModInfo {
     }
 }
 
+#[derive(Component)]
+pub struct ModEntry {
+    pub path: String
+}
+impl ModEntry {
+    fn new(path: String) -> Self {
+        ModEntry {
+            path: path
+        }
+    }
+}
+
 fn load_mods(
     mut commands: Commands,
     mut next_state: ResMut<NextState<AppState>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
     assets: Res<PreloadedAssets>
 ) {
@@ -66,16 +79,44 @@ fn load_mods(
                     }
 
                     // Create the mod entry
-                    // TODO: add mod marker with directory info, add buttons, implement ordering functionality
+                    // TODO: fix button_step system not working on button children, implement ordering functionality
+                    let dimensions_toggle = UVec2::new(16, 16);
+                    let layout_toggle = TextureAtlasLayout::from_grid(dimensions_toggle, 2, 1, None, None);
+                    let texture_atlas_layout_toggle = texture_atlas_layouts.add(layout_toggle);
+                    let dimensions_arrows = UVec2::new(16, 14);
+                    let layout_arrows = TextureAtlasLayout::from_grid(dimensions_arrows, 2, 1, None, None);
+                    let texture_atlas_layout_arrows = texture_atlas_layouts.add(layout_arrows);
                     let text_color_light = Color::srgb_u8(155, 153, 139);
                     let text_color_dark = Color::srgb_u8(64, 64, 64);
                     let text_start_x: f32 = -205.;
                     let text_start_y: f32 = 53.;
                     let text_width: f32 = 620.;
                     commands.spawn((
+                        ModEntry::new(mod_path),
                         Transform::from_xyz(146., 206., -100.),
                         Visibility::default(),
-                        children![(
+                        children![button_bundle(
+                            // Toggle button
+                            -407., 0., 0., true,
+                            dimensions_toggle.as_vec2(),
+                            assets.get_audio("vs_ui_click1"),
+                            assets.get_image("spr_modButton_toggle"),
+                            texture_atlas_layout_toggle
+                        ), button_bundle(
+                            // Up arrow button
+                            -407., 25., 0., false,
+                            dimensions_arrows.as_vec2(),
+                            assets.get_audio("vs_ui_click1"),
+                            assets.get_image("spr_modButton_up"),
+                            texture_atlas_layout_arrows.clone()
+                        ), button_bundle(
+                            // Down arrow button
+                            -407., -25., 0., false,
+                            dimensions_arrows.as_vec2(),
+                            assets.get_audio("vs_ui_click1"),
+                            assets.get_image("spr_modButton_down"),
+                            texture_atlas_layout_arrows
+                        ), (
                             // Preview image
                             preview_sprite,
                             Transform::from_xyz(-302., 0., 0.)
