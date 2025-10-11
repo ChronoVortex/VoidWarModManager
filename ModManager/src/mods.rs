@@ -51,6 +51,9 @@ pub struct ModUpButton;
 #[derive(Component)]
 pub struct ModDownButton;
 
+#[derive(Event)]
+struct ModOrderChanged;
+
 fn load_mods(
     mut commands: Commands,
     mut next_state: ResMut<NextState<AppState>>,
@@ -256,6 +259,7 @@ fn load_mods(
 }
 
 pub fn button_mod_arrow_step(
+    mut commands: Commands,
     mut mod_entry_query: Query<(&mut ModEntry, &mut Transform, &Children)>,
     button_up_query: Query<&MainButton, With<ModUpButton>>,
     button_down_query: Query<&MainButton, With<ModDownButton>>
@@ -273,6 +277,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                commands.trigger(ModOrderChanged);
                 return;
             }
 
@@ -282,6 +287,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                commands.trigger(ModOrderChanged);
                 return;
             }
         }
@@ -292,6 +298,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                commands.trigger(ModOrderChanged);
                 return;
             }
 
@@ -301,9 +308,26 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                commands.trigger(ModOrderChanged);
                 return;
             }
         }
+    }
+}
+
+fn save_mod_order(
+	_: Trigger<ModOrderChanged>,
+	mod_entry_query: Query<&ModEntry>
+) {
+    // Create a vector for the mod order
+    let mut mod_paths = vec![""; mod_entry_query.iter().count()];
+    for mod_entry in mod_entry_query {
+        mod_paths[mod_entry.index as usize] = mod_entry.path.as_str();
+    }
+
+    // Save mod order
+    if let Ok(mod_order_json) = serde_json::to_string(&mod_paths) {
+        let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
     }
 }
 
@@ -312,5 +336,6 @@ impl Plugin for ModsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::LoadingMods), load_mods);
         app.add_systems(Update, button_mod_arrow_step);
+        app.add_observer(save_mod_order);
     }
 }
