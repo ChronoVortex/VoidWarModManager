@@ -3,7 +3,7 @@ use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
 use serde::Deserialize;
 use image::image_dimensions;
-use crate::{AppState, PreloadedAssets, buttons::button_bundle, util::appdata_path};
+use crate::{buttons::{button_bundle, MainButton}, util::appdata_path, AppState, PreloadedAssets};
 
 #[derive(Deserialize)]
 #[serde(default)]
@@ -30,12 +30,14 @@ impl Default for ModInfo {
 
 #[derive(Component)]
 pub struct ModEntry {
-    pub path: String
+    pub path: String,
+    pub index: i32
 }
 impl ModEntry {
-    fn new(path: String) -> Self {
+    fn new(path: String, index: i32) -> Self {
         ModEntry {
-            path: path
+            path: path,
+            index: index
         }
     }
 }
@@ -121,6 +123,7 @@ fn load_mods(
         // Walk through each mod
         let mut vertical_offset: f32 = 206.;
         let vertical_spacing: f32 = 136.;
+        let mut mod_entry_index = 0;
         for mod_path in mod_paths {
             // Check if the mod preview image exists and is the correct size, otherwise use the missing preview icon
             let preview_path = mod_path.clone() + "\\preview.png";
@@ -154,7 +157,7 @@ fn load_mods(
             let text_start_y: f32 = 53.;
             let text_width: f32 = 620.;
             commands.spawn((
-                ModEntry::new(mod_path),
+                ModEntry::new(mod_path, mod_entry_index),
                 Transform::from_xyz(146., vertical_offset, -100.),
                 Visibility::default(),
                 children![(
@@ -243,6 +246,7 @@ fn load_mods(
                 )]
             ));
 
+            mod_entry_index += 1;
             vertical_offset -= vertical_spacing;
         }
     } else {
@@ -251,9 +255,62 @@ fn load_mods(
     next_state.set(AppState::Running);
 }
 
+pub fn button_mod_arrow_step(
+    mut mod_entry_query: Query<(&mut ModEntry, &mut Transform, &Children)>,
+    button_up_query: Query<&MainButton, With<ModUpButton>>,
+    button_down_query: Query<&MainButton, With<ModDownButton>>
+) {
+    // Iterate through every combination of two mod entries to check if we need to swap any
+    let mut iter = mod_entry_query.iter_combinations_mut();
+    while let Some([
+        (mut mod_entry_1, mut transform_1, children_1),
+        (mut mod_entry_2, mut transform_2, children_2)
+    ]) = iter.fetch_next() {
+        for child in children_1.iter() {
+            // Swap mod_entry_1 with the entry above if its up arrow was pressed
+            if mod_entry_2.index + 1 == mod_entry_1.index
+            && let Ok(button) = button_up_query.get(child)
+            && button.just_pressed {
+                std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
+                std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                return;
+            }
+
+            // Swap mod_entry_1 with the entry below if its down arrow was pressed
+            if mod_entry_2.index - 1 == mod_entry_1.index
+            && let Ok(button) = button_down_query.get(child)
+            && button.just_pressed {
+                std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
+                std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                return;
+            }
+        }
+        for child in children_2.iter() {
+            // Swap mod_entry_2 with the entry above if its up arrow was pressed
+            if mod_entry_1.index + 1 == mod_entry_2.index
+            && let Ok(button) = button_up_query.get(child)
+            && button.just_pressed {
+                std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
+                std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                return;
+            }
+
+            // Swap mod_entry_2 with the entry below if its down arrow was pressed
+            if mod_entry_1.index - 1 == mod_entry_2.index
+            && let Ok(button) = button_down_query.get(child)
+            && button.just_pressed {
+                std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
+                std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
+                return;
+            }
+        }
+    }
+}
+
 pub struct ModsPlugin;
 impl Plugin for ModsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::LoadingMods), load_mods);
+        app.add_systems(Update, button_mod_arrow_step);
     }
 }
