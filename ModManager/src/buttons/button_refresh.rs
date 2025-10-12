@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{PreloadedAssets, buttons::{button_small_bundle, MainButton}};
+use crate::{PreloadedAssets, AppState, buttons::{button_small_bundle, MainButton}, mods::ModEntry};
 
 #[derive(Component)]
 pub struct RefreshButton;
@@ -28,9 +28,18 @@ pub fn button_refresh_init(
 }
 
 pub fn button_refresh_step(
-    button: Single<&MainButton, With<RefreshButton>>
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<AppState>>,
+    button: Single<&MainButton, With<RefreshButton>>,
+    mod_entry_query: Query<Entity, With<ModEntry>>
 ) {
     if button.just_pressed {
-        // LOGIC
+        // Remove all mod entries
+        for mod_entry in mod_entry_query {
+            commands.entity(mod_entry.entity()).despawn();
+        }
+
+        // Reload mods
+        next_state.set(AppState::LoadingMods);
     }
 }
