@@ -167,7 +167,7 @@ fn load_mods(
                     // Toggle button
                     ModToggleButton,
                     button_bundle(
-                        -407., 0., 0., true,
+                        -407., 0., 0., Some(false),
                         dimensions_toggle.as_vec2(),
                         assets.get_audio("vs_ui_click1"),
                         assets.get_image("spr_modButton_toggle"),
@@ -177,7 +177,7 @@ fn load_mods(
                     // Up arrow button
                     ModUpButton,
                     button_bundle(
-                        -407., 25., 0., false,
+                        -407., 25., 0., None,
                         dimensions_arrows.as_vec2(),
                         assets.get_audio("vs_ui_click1"),
                         assets.get_image("spr_modButton_up"),
@@ -187,7 +187,7 @@ fn load_mods(
                     // Down arrow button
                     ModDownButton,
                     button_bundle(
-                        -407., -25., 0., false,
+                        -407., -25., 0., None,
                         dimensions_arrows.as_vec2(),
                         assets.get_audio("vs_ui_click1"),
                         assets.get_image("spr_modButton_down"),

@@ -43,12 +43,12 @@ pub struct MainButton {
     pub active: bool
 }
 impl MainButton {
-    pub fn new(size: Vec2, sound: Handle<AudioSource>, toggle: bool) -> Self {
+    pub fn new(size: Vec2, sound: Handle<AudioSource>, toggle_on: Option<bool>) -> Self {
         MainButton {
             size: size,
             sound: sound,
-            toggle: toggle,
-            toggle_on: false,
+            toggle: toggle_on.is_some(),
+            toggle_on: toggle_on.unwrap_or(false),
             pressed: false,
             just_pressed: false,
             active: true
@@ -60,19 +60,19 @@ pub fn button_bundle(
     pos_x: f32,
     pos_y: f32,
     pos_z: f32,
-    toggle: bool,
+    toggle_on: Option<bool>,
     size: Vec2,
     sound: Handle<AudioSource>,
     texture: Handle<Image>,
     texture_atlas_layout: Handle<TextureAtlasLayout>
 ) -> impl Bundle {
     (
-        MainButton::new(size, sound, toggle),
+        MainButton::new(size, sound, toggle_on),
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
                 layout: texture_atlas_layout,
-                index: 0,
+                index: if toggle_on.unwrap_or(false) { 1 } else { 0 },
             },
         ),
         Transform::from_xyz(pos_x, pos_y, pos_z)
@@ -92,7 +92,7 @@ pub fn button_large_bundle(
     font_size: Option<f32>
 ) -> impl Bundle {
     (
-        MainButton::new(size, sound, false),
+        MainButton::new(size, sound, None),
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
@@ -124,7 +124,7 @@ pub fn button_small_bundle(
     font: Handle<ImageFont>
 ) -> impl Bundle {
     (
-        MainButton::new(size, sound, false),
+        MainButton::new(size, sound, None),
         Sprite::from_atlas_image(
             texture,
             TextureAtlas {
