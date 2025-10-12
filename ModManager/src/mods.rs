@@ -1,7 +1,7 @@
 use std::fs;
 use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use image::image_dimensions;
 use crate::{buttons::{button_bundle, MainButton}, util::appdata_path, AppState, PreloadedAssets};
 
@@ -42,6 +42,20 @@ impl ModEntry {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize, Default)]
+pub struct ModEntrySave {
+    pub path: String,
+    pub selected: bool
+}
+impl ModEntrySave {
+    fn new(path: String, selected: bool) -> Self {
+        ModEntrySave {
+            path: path,
+            selected: selected
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct ModToggleButton;
 
@@ -52,7 +66,7 @@ pub struct ModUpButton;
 pub struct ModDownButton;
 
 #[derive(Event)]
-struct ModOrderChanged;
+struct ModsChanged;
 
 fn load_mods(
     mut commands: Commands,
@@ -67,59 +81,59 @@ fn load_mods(
     if fs::exists(mods_dir.clone()).expect("Unable to check for mods folder") {
 
         // Collect all mods in the mod folder
-        let mut mod_paths: Vec<String> = Vec::new();
-        for mod_dir_entry in fs::read_dir(mods_dir).expect("Unable to read mods folder") {
-            let mod_dir = mod_dir_entry.unwrap();
+        let mut mod_entries: Vec<ModEntrySave> = Vec::new();
+        for mod_dir_res in fs::read_dir(mods_dir).expect("Unable to read mods folder") {
+            let mod_dir = mod_dir_res.unwrap();
             if mod_dir.file_type().unwrap().is_dir() {
-                let mod_path = String::from(mod_dir.path().as_path().to_str().unwrap());
+                let mod_entry = String::from(mod_dir.path().as_path().to_str().unwrap());
 
                 // Ensure the folder has a project file
-                if fs::exists(mod_path.clone() + "\\project.json").expect("Unable to check for project file") {
-                    mod_paths.push(mod_path);
+                if fs::exists(mod_entry.clone() + "\\project.json").expect("Unable to check for project file") {
+                    mod_entries.push(ModEntrySave::new(mod_entry, false));
                 }
             }
         }
 
         // Apply saved mod order
         if let Ok(mod_order_json) = fs::read_to_string(appdata_path("Void_War\\mods\\order.json"))
-        && let Ok(mod_order) = serde_json::from_str::<Vec<String>>(&mod_order_json) {
-            let mut mod_paths_new: Vec<String> = Vec::with_capacity(mod_paths.len());
-            let mut mod_paths_marks = vec![false; mod_paths.len()];
+        && let Ok(mod_order) = serde_json::from_str::<Vec<ModEntrySave>>(&mod_order_json) {
+            let mut mod_entries_new: Vec<ModEntrySave> = Vec::with_capacity(mod_entries.len());
+            let mut mod_entries_marks = vec![false; mod_entries.len()];
             let mut mod_order_marks = vec![false; mod_order.len()];
 
             // Mark entires to be moved to new path list
-            for mod_paths_index in 0..mod_paths.len() {
+            for mod_entries_index in 0..mod_entries.len() {
                 let mut missing_from_order = true;
                 for mod_order_index in 0..mod_order.len() {
-                    if mod_paths[mod_paths_index] == mod_order[mod_order_index] {
+                    if mod_entries[mod_entries_index].path == mod_order[mod_order_index].path {
                         mod_order_marks[mod_order_index] = true;
                         missing_from_order = false;
                         break;
                     }
                 }
                 if missing_from_order {
-                    mod_paths_marks[mod_paths_index] = true;
+                    mod_entries_marks[mod_entries_index] = true;
                 }
             }
 
             // Move entries to new path list
-            for mod_paths_index in 0..mod_paths.len() {
-                if mod_paths_marks[mod_paths_index] {
-                    mod_paths_new.push(mod_paths[mod_paths_index].clone());
+            for mod_entries_index in 0..mod_entries.len() {
+                if mod_entries_marks[mod_entries_index] {
+                    mod_entries_new.push(mod_entries[mod_entries_index].clone());
                 }
             }
             for mod_order_index in 0..mod_order.len() {
                 if mod_order_marks[mod_order_index] {
-                    mod_paths_new.push(mod_order[mod_order_index].clone());
+                    mod_entries_new.push(mod_order[mod_order_index].clone());
                 }
             }
 
             // Assign new path list
-            mod_paths = mod_paths_new;
+            mod_entries = mod_entries_new;
         }
 
         // Save mod order
-        if let Ok(mod_order_json) = serde_json::to_string(&mod_paths) {
+        if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
             let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
         }
 
@@ -127,9 +141,9 @@ fn load_mods(
         let mut vertical_offset: f32 = 206.;
         let vertical_spacing: f32 = 136.;
         let mut mod_entry_index = 0;
-        for mod_path in mod_paths {
+        for mod_entry in mod_entries {
             // Check if the mod preview image exists and is the correct size, otherwise use the missing preview icon
-            let preview_path = mod_path.clone() + "\\preview.png";
+            let preview_path = mod_entry.path.clone() + "\\preview.png";
             let preview_sprite =
                 if let Ok(preview_size) = image_dimensions(preview_path.clone()) && preview_size.0 <= 168 && preview_size.1 <= 120
                 { Sprite::from_image(asset_server.load(String::from("file://") + preview_path.as_str())) } else
@@ -137,14 +151,14 @@ fn load_mods(
             
             // Load metadata
             let mut metadata = 
-                if let Ok(metadata_str) = fs::read_to_string(mod_path.clone() + "\\metadata.json")
+                if let Ok(metadata_str) = fs::read_to_string(mod_entry.path.clone() + "\\metadata.json")
                 && let Ok(metadata_res) = serde_json::from_str::<ModInfo>(&metadata_str) {
                     metadata_res
                 } else {
                     ModInfo::default()
                 };
             if metadata.title.is_empty() {
-                metadata.title = String::from(mod_path.get(mod_path.rfind("\\").unwrap() + 1..).unwrap());
+                metadata.title = String::from(mod_entry.path.get(mod_entry.path.rfind("\\").unwrap() + 1..).unwrap());
             }
 
             // Create the mod entry
@@ -160,14 +174,14 @@ fn load_mods(
             let text_start_y: f32 = 53.;
             let text_width: f32 = 620.;
             commands.spawn((
-                ModEntry::new(mod_path, mod_entry_index),
+                ModEntry::new(mod_entry.path, mod_entry_index),
                 Transform::from_xyz(146., vertical_offset, -100.),
                 Visibility::default(),
                 children![(
                     // Toggle button
                     ModToggleButton,
                     button_bundle(
-                        -407., 0., 0., Some(false),
+                        -407., 0., 0., Some(mod_entry.selected),
                         dimensions_toggle.as_vec2(),
                         assets.get_audio("vs_ui_click1"),
                         assets.get_image("spr_modButton_toggle"),
@@ -277,7 +291,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
-                commands.trigger(ModOrderChanged);
+                commands.trigger(ModsChanged);
                 return;
             }
 
@@ -287,7 +301,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
-                commands.trigger(ModOrderChanged);
+                commands.trigger(ModsChanged);
                 return;
             }
         }
@@ -298,7 +312,7 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
-                commands.trigger(ModOrderChanged);
+                commands.trigger(ModsChanged);
                 return;
             }
 
@@ -308,25 +322,48 @@ pub fn button_mod_arrow_step(
             && button.just_pressed {
                 std::mem::swap(&mut mod_entry_1.index, &mut mod_entry_2.index);
                 std::mem::swap(&mut transform_1.translation.y, &mut transform_2.translation.y);
-                commands.trigger(ModOrderChanged);
+                commands.trigger(ModsChanged);
                 return;
             }
         }
     }
 }
 
-fn save_mod_order(
-	_: Trigger<ModOrderChanged>,
-	mod_entry_query: Query<&ModEntry>
+pub fn button_mod_toggle_step(
+    mut commands: Commands,
+    button_toggle_query: Query<&MainButton, With<ModToggleButton>>
+) {
+    // Trigger a save on pressing a toggle button
+    for button in button_toggle_query {
+        if button.just_pressed {
+            commands.trigger(ModsChanged);
+            return;
+        }
+    }
+}
+
+fn save_mods_state(
+	_: Trigger<ModsChanged>,
+	mod_entry_query: Query<(&ModEntry, &Children)>,
+    button_toggle_query: Query<&MainButton, With<ModToggleButton>>
 ) {
     // Create a vector for the mod order
-    let mut mod_paths = vec![""; mod_entry_query.iter().count()];
-    for mod_entry in mod_entry_query {
-        mod_paths[mod_entry.index as usize] = mod_entry.path.as_str();
+    let mut mod_entries: Vec<ModEntrySave> = vec![Default::default(); mod_entry_query.iter().count()];
+    for (mod_entry, children) in mod_entry_query {
+        // Save mod path
+        mod_entries[mod_entry.index as usize].path = mod_entry.path.clone();
+
+        // Save whether the mod is toggled for patching
+        for child in children.iter() {
+            if let Ok(button) = button_toggle_query.get(child) {
+                mod_entries[mod_entry.index as usize].selected = button.toggle_on;
+                break;
+            }
+        }
     }
 
     // Save mod order
-    if let Ok(mod_order_json) = serde_json::to_string(&mod_paths) {
+    if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
         let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
     }
 }
@@ -335,7 +372,7 @@ pub struct ModsPlugin;
 impl Plugin for ModsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::LoadingMods), load_mods);
-        app.add_systems(Update, button_mod_arrow_step);
-        app.add_observer(save_mod_order);
+        app.add_systems(Update, (button_mod_arrow_step, button_mod_toggle_step));
+        app.add_observer(save_mods_state);
     }
 }
