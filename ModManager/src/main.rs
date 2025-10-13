@@ -41,7 +41,6 @@ use crate::mods::ModsPlugin;
 pub enum AppState {
     #[default]
     Loading,
-    LoadingMods,
     Running
 }
 
@@ -235,7 +234,7 @@ fn initialize(
     // Transition to running state
     // Use OnExit(AppState::Loading) schedule for any startup
     // systems that depend on assets initialized here
-    next_state.set(AppState::LoadingMods);
+    next_state.set(AppState::Running);
 }
 
 fn main() {

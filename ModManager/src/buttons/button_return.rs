@@ -1,7 +1,7 @@
 use bevy::{prelude::*, color::palettes::basic::RED};
 use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 use crate::{
-    buttons::{button_large_bundle, confirm_popup_bundle, MainButton}, log::LogManager, util::{local_path, run_program}, PreloadedAssets
+    buttons::{button_large_bundle, confirm_popup_bundle, MainButton}, log::LogManager, mods::ModLibrary, util::{local_path, run_program}, PreloadedAssets
 };
 
 #[derive(Component)]
@@ -36,6 +36,7 @@ pub struct ReturnButtonConfirm;
 pub fn button_return_step(
     mut button: Single<&mut MainButton, With<ReturnButton>>,
     mut buttons_other: Query<&mut MainButton, Without<ReturnButton>>,
+    mut mod_library: ResMut<ModLibrary>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -48,6 +49,7 @@ pub fn button_return_step(
         for mut button_other in &mut buttons_other {
             button_other.active = false;
         }
+        mod_library.buttons_active = false;
 
         // Spawn confirmation box
         let dimensions = UVec2::new(134, 38);

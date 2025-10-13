@@ -7,6 +7,7 @@ use bevy_image_font::{
     ImageFont, ImageFontText, LetterSpacing,
     atlas_sprites::ImageFontSpriteText
 };
+use crate::mods::ModLibrary;
 use crate::AppState;
 use crate::cursor::Cursor;
 use crate::settings::Settings;
@@ -140,7 +141,7 @@ pub fn button_small_bundle(
             ImageFontText::default()
                 .text(text)
                 .font(font),
-            Transform::from_xyz(0., 0., 0.)
+            Transform::from_xyz(0., 0., 1.)
         )]
     )
 }
@@ -272,6 +273,7 @@ fn button_cancel_step(
     mut commands: Commands,
     button: Single<&MainButton, With<CancelButton>>,
     mut buttons_other: Query<&mut MainButton, Without<CancelButton>>,
+    mut mod_library: ResMut<ModLibrary>,
     popup: Single<Entity, With<ConfirmPopup>>
 ) {
     if button.just_pressed {
@@ -279,6 +281,7 @@ fn button_cancel_step(
         for mut button_other in &mut buttons_other {
             button_other.active = true;
         }
+        mod_library.buttons_active = true;
 
         // Despawn the confirmation popup
         commands.entity(popup.entity()).despawn();

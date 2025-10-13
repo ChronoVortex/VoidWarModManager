@@ -5,6 +5,30 @@ use serde::{Serialize, Deserialize};
 use image::image_dimensions;
 use crate::{buttons::{button_bundle, MainButton}, util::appdata_path, AppState, PreloadedAssets};
 
+#[derive(Resource)]
+pub struct ModLibrary {
+    pub pos_x: f32,
+    pub pos_y: f32,
+    pub window_height: f32,
+    pub window_padding: f32,
+    pub mods_height: f32,
+    pub current_offset: f32,
+    pub buttons_active: bool
+}
+impl ModLibrary {
+    fn new(pos_x: f32, pos_y: f32, window_height: f32, window_padding: f32) -> ModLibrary {
+        ModLibrary {
+            pos_x: pos_x,
+            pos_y: pos_y,
+            window_height: window_height,
+            window_padding: window_padding,
+            mods_height: 0.,
+            current_offset: 0.,
+            buttons_active: true
+        }
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(default)]
 struct ModInfo {
@@ -66,18 +90,23 @@ pub struct ModUpButton;
 pub struct ModDownButton;
 
 #[derive(Event)]
+pub struct ModsLoad;
+
+#[derive(Event)]
 struct ModsChanged;
 
 fn load_mods(
+	_: Trigger<ModsLoad>,
     mut commands: Commands,
-    mut next_state: ResMut<NextState<AppState>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut mod_library: ResMut<ModLibrary>,
     asset_server: Res<AssetServer>,
     assets: Res<PreloadedAssets>
 ) {
     let mods_dir = appdata_path("Void_War\\mods");
+    let mut mods_height: f32 = 0.;
     if fs::exists(mods_dir.clone()).expect("Unable to check for mods folder") {
 
         // Collect all mods in the mod folder
@@ -235,10 +264,11 @@ fn load_mods(
                         .anchor(Anchor::TopLeft),
                     ImageFontText::default()
                         .text(format!(
-                            "VERSION: {}.{}.{}   AUTHORS: {}",
+                            "VERSION: {}.{}.{}   {}: {}",
                             metadata.version_major,
                             metadata.version_minor,
                             metadata.version_patch,
+                            if metadata.authors.len() > 1 { "AUTHORS" } else { "AUTHOR" },
                             metadata.authors.join(", ")
                         ))
                         .font(assets.get_image_font("pixel_font")),
@@ -265,11 +295,38 @@ fn load_mods(
 
             mod_entry_index += 1;
             vertical_offset -= vertical_spacing;
+            mods_height += vertical_spacing;
         }
     } else {
         fs::create_dir(appdata_path("Void_War\\mods")).expect("Unable to create mods folder");
     }
-    next_state.set(AppState::Running);
+    mod_library.mods_height = f32::max(0., mods_height - 10.);
+}
+
+fn save_mods_state(
+	_: Trigger<ModsChanged>,
+	mod_entry_query: Query<(&ModEntry, &Children)>,
+    button_toggle_query: Query<&MainButton, With<ModToggleButton>>
+) {
+    // Create a vector for the mod order
+    let mut mod_entries: Vec<ModEntrySave> = vec![Default::default(); mod_entry_query.iter().count()];
+    for (mod_entry, children) in mod_entry_query {
+        // Save mod path
+        mod_entries[mod_entry.index as usize].path = mod_entry.path.clone();
+
+        // Save whether the mod is toggled for patching
+        for child in children.iter() {
+            if let Ok(button) = button_toggle_query.get(child) {
+                mod_entries[mod_entry.index as usize].selected = button.toggle_on;
+                break;
+            }
+        }
+    }
+
+    // Save mod order
+    if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
+        let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
+    }
 }
 
 pub fn button_mod_arrow_step(
@@ -342,37 +399,13 @@ pub fn button_mod_toggle_step(
     }
 }
 
-fn save_mods_state(
-	_: Trigger<ModsChanged>,
-	mod_entry_query: Query<(&ModEntry, &Children)>,
-    button_toggle_query: Query<&MainButton, With<ModToggleButton>>
-) {
-    // Create a vector for the mod order
-    let mut mod_entries: Vec<ModEntrySave> = vec![Default::default(); mod_entry_query.iter().count()];
-    for (mod_entry, children) in mod_entry_query {
-        // Save mod path
-        mod_entries[mod_entry.index as usize].path = mod_entry.path.clone();
-
-        // Save whether the mod is toggled for patching
-        for child in children.iter() {
-            if let Ok(button) = button_toggle_query.get(child) {
-                mod_entries[mod_entry.index as usize].selected = button.toggle_on;
-                break;
-            }
-        }
-    }
-
-    // Save mod order
-    if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
-        let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
-    }
-}
-
 pub struct ModsPlugin;
 impl Plugin for ModsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::LoadingMods), load_mods);
-        app.add_systems(Update, (button_mod_arrow_step, button_mod_toggle_step));
+        app.insert_resource(ModLibrary::new(-279., 279., 608., 10.));
+        app.add_observer(load_mods);
         app.add_observer(save_mods_state);
+        app.add_systems(OnExit(AppState::Loading), |mut commands: Commands| commands.trigger(ModsLoad));
+        app.add_systems(Update, (button_mod_arrow_step, button_mod_toggle_step));
     }
 }

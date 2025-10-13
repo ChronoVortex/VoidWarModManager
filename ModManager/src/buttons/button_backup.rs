@@ -1,9 +1,7 @@
 use std::fs;
 use bevy::prelude::*;
 use crate::{
-    PreloadedAssets, log::LogManager,
-    buttons::{button_large_bundle, confirm_popup_bundle, MainButton, ConfirmPopup},
-    util::{local_path, appdata_path}
+    buttons::{button_large_bundle, confirm_popup_bundle, ConfirmPopup, MainButton}, log::LogManager, mods::ModLibrary, util::{appdata_path, local_path}, PreloadedAssets
 };
 
 #[derive(Component)]
@@ -38,6 +36,7 @@ pub struct BackupButtonConfirm;
 pub fn button_backup_step(
     mut button: Single<&mut MainButton, With<BackupButton>>,
     mut buttons_other: Query<&mut MainButton, Without<BackupButton>>,
+    mut mod_library: ResMut<ModLibrary>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -50,6 +49,7 @@ pub fn button_backup_step(
         for mut button_other in &mut buttons_other {
             button_other.active = false;
         }
+        mod_library.buttons_active = false;
 
         // Spawn confirmation box
         let dimensions = UVec2::new(134, 38);
