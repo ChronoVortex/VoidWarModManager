@@ -10,15 +10,17 @@ pub struct ModLibrary {
     pub start_y: f32,
     pub window_height: f32,
     pub window_padding: f32,
+    pub window_rect: Rect,
     pub mods_height: f32,
     pub buttons_active: bool
 }
 impl ModLibrary {
-    fn new(start_y: f32, window_height: f32, window_padding: f32) -> ModLibrary {
+    fn new(start_y: f32, window_height: f32, window_padding: f32, window_rect: Rect) -> ModLibrary {
         ModLibrary {
             start_y: start_y,
             window_height: window_height,
             window_padding: window_padding,
+            window_rect: window_rect,
             mods_height: 0.,
             buttons_active: true
         }
@@ -93,7 +95,7 @@ struct ModsChanged;
 
 fn init_mods(mut commands: Commands) {
     commands.spawn((
-        ModLibrary::new(206., 608., 10.),
+        ModLibrary::new(206., 608., 10., Rect::new(-279., -329., 571., 279.)),
         Transform::from_xyz(146., 206., -100.),
         Visibility::default()
     ));

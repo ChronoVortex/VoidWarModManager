@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{buttons::{button_bundle, MainButton}, cursor::Cursor, mods::ModLibrary, AppState, PreloadedAssets};
+use crate::{AppState, PreloadedAssets, buttons::{MainButton, button_bundle}, cursor::Cursor, mods::{ModDownButton, ModLibrary, ModToggleButton, ModUpButton}};
 
 #[derive(Component)]
 pub struct ScrollButton {
@@ -83,6 +83,19 @@ fn button_scroll_down_init(
     ));
 }
 
+fn buttons_manage_active(
+    mut button_query: Query<(&mut MainButton, &GlobalTransform), Or<(With<ModToggleButton>, With<ModUpButton>, With<ModDownButton>)>>,
+    mod_library: Single<&ModLibrary>
+) {
+    // Only manage mod buttons if all buttons are enabled
+    if mod_library.buttons_active {
+        for (mut button, transform) in &mut button_query {
+            // Deactivate mod buttons which aren't visible
+            button.active = mod_library.window_rect.contains(transform.translation().truncate());
+        }
+    }
+}
+
 fn button_scroll_step(
     mod_library_query: Single<(&ModLibrary, &mut Transform)>,
     button_query: Single<(&MainButton, &mut ScrollButton, &mut Transform), Without<ModLibrary>>,
@@ -117,6 +130,9 @@ impl Plugin for ModsScrollPlugin {
             button_scroll_up_init,
             button_scroll_down_init
         ));
-        app.add_systems(Update, button_scroll_step);
+        app.add_systems(Update, (
+            buttons_manage_active,
+            button_scroll_step
+        ));
     }
 }
