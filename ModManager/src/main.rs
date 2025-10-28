@@ -35,6 +35,7 @@ mod log;
 use crate::log::LogPlugin;
 
 mod mods;
+mod mods_scroll;
 use crate::mods::ModsPlugin;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]

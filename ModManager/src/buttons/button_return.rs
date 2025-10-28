@@ -36,7 +36,7 @@ pub struct ReturnButtonConfirm;
 pub fn button_return_step(
     mut button: Single<&mut MainButton, With<ReturnButton>>,
     mut buttons_other: Query<&mut MainButton, Without<ReturnButton>>,
-    mut mod_library: ResMut<ModLibrary>,
+    mut mod_library: Single<&mut ModLibrary>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,

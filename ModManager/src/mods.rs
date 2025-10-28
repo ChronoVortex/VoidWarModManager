@@ -3,28 +3,38 @@ use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
 use serde::{Serialize, Deserialize};
 use image::image_dimensions;
-use crate::{buttons::{button_bundle, MainButton}, util::appdata_path, AppState, PreloadedAssets};
+use crate::{buttons::{button_bundle, MainButton}, mods_scroll::{ModsScrollPlugin, ScrollButton}, util::appdata_path, AppState, PreloadedAssets};
 
-#[derive(Resource)]
+#[derive(Component)]
 pub struct ModLibrary {
-    pub pos_x: f32,
-    pub pos_y: f32,
+    pub start_y: f32,
     pub window_height: f32,
     pub window_padding: f32,
     pub mods_height: f32,
-    pub current_offset: f32,
     pub buttons_active: bool
 }
 impl ModLibrary {
-    fn new(pos_x: f32, pos_y: f32, window_height: f32, window_padding: f32) -> ModLibrary {
+    fn new(start_y: f32, window_height: f32, window_padding: f32) -> ModLibrary {
         ModLibrary {
-            pos_x: pos_x,
-            pos_y: pos_y,
+            start_y: start_y,
             window_height: window_height,
             window_padding: window_padding,
             mods_height: 0.,
-            current_offset: 0.,
             buttons_active: true
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct ModEntry {
+    pub path: String,
+    pub index: i32
+}
+impl ModEntry {
+    fn new(path: String, index: i32) -> Self {
+        ModEntry {
+            path: path,
+            index: index
         }
     }
 }
@@ -48,20 +58,6 @@ impl Default for ModInfo {
             version_patch: 0,
             authors: vec!["Unknown".to_string()],
             description: "No description provided.".to_string()
-        }
-    }
-}
-
-#[derive(Component)]
-pub struct ModEntry {
-    pub path: String,
-    pub index: i32
-}
-impl ModEntry {
-    fn new(path: String, index: i32) -> Self {
-        ModEntry {
-            path: path,
-            index: index
         }
     }
 }
@@ -95,18 +91,35 @@ pub struct ModsLoad;
 #[derive(Event)]
 struct ModsChanged;
 
+fn init_mods(mut commands: Commands) {
+    commands.spawn((
+        ModLibrary::new(206., 608., 10.),
+        Transform::from_xyz(146., 206., -100.),
+        Visibility::default()
+    ));
+    commands.trigger(ModsLoad);
+}
+
 fn load_mods(
 	_: Trigger<ModsLoad>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut mod_library: ResMut<ModLibrary>,
+    scroll_button_query: Single<(&ScrollButton, &mut Transform)>,
+    mod_library_query: Single<(Entity, &mut ModLibrary, &mut Transform), Without<ScrollButton>>,
     asset_server: Res<AssetServer>,
     assets: Res<PreloadedAssets>
 ) {
+    // Reset scrolling
+    let (mod_library_entity, mut mod_library, mut mod_library_transform) = mod_library_query.into_inner();
+    mod_library_transform.translation.y = mod_library.start_y;
+    let (scroll_button, mut scroll_button_transform) = scroll_button_query.into_inner();
+    scroll_button_transform.translation.y = scroll_button.start_y;
+
+    // Load mods if mod folder exists
     let mods_dir = appdata_path("Void_War\\mods");
-    let mut mods_height: f32 = 0.;
+    let mut vertical_offset: f32 = 0.;
     if fs::exists(mods_dir.clone()).expect("Unable to check for mods folder") {
 
         // Collect all mods in the mod folder
@@ -167,7 +180,6 @@ fn load_mods(
         }
 
         // Walk through each mod
-        let mut vertical_offset: f32 = 206.;
         let vertical_spacing: f32 = 136.;
         let mut mod_entry_index = 0;
         for mod_entry in mod_entries {
@@ -204,8 +216,9 @@ fn load_mods(
             let text_width: f32 = 620.;
             commands.spawn((
                 ModEntry::new(mod_entry.path, mod_entry_index),
-                Transform::from_xyz(146., vertical_offset, -100.),
+                Transform::from_xyz(0., vertical_offset, 0.),
                 Visibility::default(),
+                ChildOf(mod_library_entity.entity()),
                 children![(
                     // Toggle button
                     ModToggleButton,
@@ -295,12 +308,11 @@ fn load_mods(
 
             mod_entry_index += 1;
             vertical_offset -= vertical_spacing;
-            mods_height += vertical_spacing;
         }
     } else {
         fs::create_dir(appdata_path("Void_War\\mods")).expect("Unable to create mods folder");
     }
-    mod_library.mods_height = f32::max(0., mods_height - 10.);
+    mod_library.mods_height = f32::max(0., -vertical_offset - 10.);
 }
 
 fn save_mods_state(
@@ -329,7 +341,7 @@ fn save_mods_state(
     }
 }
 
-pub fn button_mod_arrow_step(
+fn button_mod_arrow_step(
     mut commands: Commands,
     mut mod_entry_query: Query<(&mut ModEntry, &mut Transform, &Children)>,
     button_up_query: Query<&MainButton, With<ModUpButton>>,
@@ -386,7 +398,7 @@ pub fn button_mod_arrow_step(
     }
 }
 
-pub fn button_mod_toggle_step(
+fn button_mod_toggle_step(
     mut commands: Commands,
     button_toggle_query: Query<&MainButton, With<ModToggleButton>>
 ) {
@@ -402,10 +414,10 @@ pub fn button_mod_toggle_step(
 pub struct ModsPlugin;
 impl Plugin for ModsPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ModLibrary::new(-279., 279., 608., 10.));
         app.add_observer(load_mods);
         app.add_observer(save_mods_state);
-        app.add_systems(OnExit(AppState::Loading), |mut commands: Commands| commands.trigger(ModsLoad));
+        app.add_systems(OnExit(AppState::Loading), init_mods);
         app.add_systems(Update, (button_mod_arrow_step, button_mod_toggle_step));
+        app.add_plugins(ModsScrollPlugin);
     }
 }

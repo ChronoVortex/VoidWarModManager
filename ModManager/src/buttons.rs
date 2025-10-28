@@ -273,7 +273,7 @@ fn button_cancel_step(
     mut commands: Commands,
     button: Single<&MainButton, With<CancelButton>>,
     mut buttons_other: Query<&mut MainButton, Without<CancelButton>>,
-    mut mod_library: ResMut<ModLibrary>,
+    mut mod_library: Single<&mut ModLibrary>,
     popup: Single<Entity, With<ConfirmPopup>>
 ) {
     if button.just_pressed {
