@@ -11,16 +11,18 @@ pub struct ModLibrary {
     pub window_height: f32,
     pub window_padding: f32,
     pub window_rect: Rect,
+    pub mods_spacing: f32,
     pub mods_height: f32,
     pub buttons_active: bool
 }
 impl ModLibrary {
-    fn new(start_y: f32, window_height: f32, window_padding: f32, window_rect: Rect) -> ModLibrary {
+    fn new(start_y: f32, window_height: f32, window_padding: f32, window_rect: Rect, mods_spacing: f32) -> ModLibrary {
         ModLibrary {
             start_y: start_y,
             window_height: window_height,
             window_padding: window_padding,
             window_rect: window_rect,
+            mods_spacing: mods_spacing,
             mods_height: 0.,
             buttons_active: true
         }
@@ -95,7 +97,7 @@ struct ModsChanged;
 
 fn init_mods(mut commands: Commands) {
     commands.spawn((
-        ModLibrary::new(206., 608., 10., Rect::new(-279., -329., 571., 279.)),
+        ModLibrary::new(206., 608., 10., Rect::new(-279., -329., 571., 279.), 136.),
         Transform::from_xyz(146., 206., -100.),
         Visibility::default()
     ));
@@ -182,7 +184,6 @@ fn load_mods(
         }
 
         // Walk through each mod
-        let vertical_spacing: f32 = 136.;
         let mut mod_entry_index = 0;
         for mod_entry in mod_entries {
             // Check if the mod preview image exists and is the correct size, otherwise use the missing preview icon
@@ -309,7 +310,7 @@ fn load_mods(
             ));
 
             mod_entry_index += 1;
-            vertical_offset -= vertical_spacing;
+            vertical_offset -= mod_library.mods_spacing;
         }
     } else {
         fs::create_dir(appdata_path("Void_War\\mods")).expect("Unable to create mods folder");
