@@ -6,6 +6,24 @@ use bevy_histrion_packer as bhp;
 use bevy_image_font::{ImageFont, loader::ImageFontLoader};
 
 fn main() -> io::Result<()> {
+    // Create rust interface for C functions
+    let bindings = bindgen::Builder::default()
+        .header("src/util.h")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .generate()
+        .expect("Unable to generate bindings");
+    let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
+
+    // Build C code
+    cc::Build::new().file("src/util.c").compile("util-cc");
+    
+    // Mark for rebuilding if C source files changed
+    println!("cargo:rerun-if-changed=src/util.c");
+    println!("cargo:rerun-if-changed=src/util.h");
+
     // Set the icon of the executable
     if env::var_os("CARGO_CFG_WINDOWS").is_some() {
         WindowsResource::new()
