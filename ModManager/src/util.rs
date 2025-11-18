@@ -25,16 +25,3 @@ pub fn run_program(path: &str) -> bool {
         return ex_run_program(program_path.as_ptr()) > 0.;
     };
 }
-
-pub fn install_project(data_path: &str, proj_paths: Vec<String>) {
-    unsafe {
-        let lib = Library::new("ModManLib.dll").expect("Could not load ModManLib.dll");
-        let ex_install_project: Symbol<unsafe extern "C" fn(data_path: *const c_char, proj_path: *const c_char)> =
-            lib.get(b"EX_ModmanInstallMod\0").expect("Could not load the function EX_ModmanInstallMod");
-        let data_dir = CString::new(data_path).unwrap();
-        for proj_path in proj_paths.iter() {
-            let mod_dir = CString::new(proj_path.as_str()).unwrap();
-            ex_install_project(data_dir.as_ptr(), mod_dir.as_ptr());
-        }
-    };
-}
