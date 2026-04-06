@@ -1,7 +1,7 @@
 use std::fs;
 use bevy::prelude::*;
 use crate::{
-    buttons::{button_large_bundle, confirm_popup_bundle, ConfirmPopup, MainButton}, log::LogManager, mods::ModLibrary, util::{appdata_path, local_path}, PreloadedAssets
+    buttons::{button_large_bundle, confirm_popup_bundle, ConfirmPopup, MainButton}, log::LogManager, mods::ModLibrary, util::{vwdata_path, local_path}, PreloadedAssets
 };
 
 #[derive(Component)]
@@ -80,12 +80,12 @@ pub fn button_backup_confirm_step(
 ) {
     if button.just_pressed {
         // Create new backup
-        if !fs::exists(appdata_path("Void_War\\.DATA_BAK")).expect("Unable to check for backup folder") {
-            fs::create_dir(appdata_path("Void_War\\.DATA_BAK")).expect("Unable to create backup folder");
+        if !fs::exists(vwdata_path(".DATA_BAK")).expect("Unable to check for backup folder") {
+            fs::create_dir(vwdata_path(".DATA_BAK")).expect("Unable to create backup folder");
         }
         fs::copy(
             local_path("data.win"), 
-            appdata_path("Void_War\\.DATA_BAK\\data.win")
+            vwdata_path(".DATA_BAK\\data.win")
         ).expect("Unable to create backup");
 
         // Log the backup

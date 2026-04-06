@@ -3,7 +3,7 @@ use bevy::{prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_image_font::{ImageFontText, LetterSpacing, atlas_sprites::ImageFontSpriteText};
 use serde::{Serialize, Deserialize};
 use image::image_dimensions;
-use crate::{buttons::{button_bundle, MainButton}, mods_scroll::{ModsScrollPlugin, ScrollButton}, util::appdata_path, AppState, PreloadedAssets};
+use crate::{buttons::{button_bundle, MainButton}, mods_scroll::{ModsScrollPlugin, ScrollButton}, util::vwdata_path, AppState, PreloadedAssets};
 
 #[derive(Component)]
 pub struct ModLibrary {
@@ -122,7 +122,7 @@ fn load_mods(
     scroll_button_transform.translation.y = scroll_button.start_y;
 
     // Load mods if mod folder exists
-    let mods_dir = appdata_path("Void_War\\mods");
+    let mods_dir = vwdata_path("mods");
     let mut vertical_offset: f32 = 0.;
     if fs::exists(mods_dir.clone()).expect("Unable to check for mods folder") {
 
@@ -141,7 +141,7 @@ fn load_mods(
         }
 
         // Apply saved mod order
-        if let Ok(mod_order_json) = fs::read_to_string(appdata_path("Void_War\\mods\\order.json"))
+        if let Ok(mod_order_json) = fs::read_to_string(vwdata_path("mods\\order.json"))
         && let Ok(mod_order) = serde_json::from_str::<Vec<ModEntrySave>>(&mod_order_json) {
             let mut mod_entries_new: Vec<ModEntrySave> = Vec::with_capacity(mod_entries.len());
             let mut mod_entries_marks = vec![false; mod_entries.len()];
@@ -180,7 +180,7 @@ fn load_mods(
 
         // Save mod order
         if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
-            let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
+            let _ = std::fs::write(vwdata_path("mods\\order.json"), mod_order_json);
         }
 
         // Walk through each mod
@@ -313,7 +313,7 @@ fn load_mods(
             vertical_offset -= mod_library.mods_spacing;
         }
     } else {
-        fs::create_dir(appdata_path("Void_War\\mods")).expect("Unable to create mods folder");
+        fs::create_dir(vwdata_path("mods")).expect("Unable to create mods folder");
     }
     mod_library.mods_height = f32::max(0., -vertical_offset - 10.);
 }
@@ -340,7 +340,7 @@ fn save_mods_state(
 
     // Save mod order
     if let Ok(mod_order_json) = serde_json::to_string(&mod_entries) {
-        let _ = std::fs::write(appdata_path("Void_War\\mods\\order.json"), mod_order_json);
+        let _ = std::fs::write(vwdata_path("mods\\order.json"), mod_order_json);
     }
 }
 

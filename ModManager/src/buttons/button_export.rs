@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{PreloadedAssets, buttons::{button_small_bundle, MainButton}, log::LogManager, util::appdata_path};
+use crate::{PreloadedAssets, buttons::{button_small_bundle, MainButton}, log::LogManager, util::vwdata_path};
 
 #[derive(Component)]
 pub struct ExportButton;
@@ -34,7 +34,7 @@ pub fn button_export_step(
     if button.just_pressed {
         if let Some(path) = rfd::FileDialog::new()
             .set_file_name("vw-mod-log.txt")
-            .set_directory(appdata_path("Void_War"))
+            .set_directory(vwdata_path(""))
             .save_file() {
             let _ = std::fs::write(path, log_man.strings.join("\n"));
         }

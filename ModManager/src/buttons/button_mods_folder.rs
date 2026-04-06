@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{PreloadedAssets, buttons::{button_small_bundle, MainButton}, util::appdata_path};
+use crate::{PreloadedAssets, buttons::{button_small_bundle, MainButton}, util::vwdata_path};
 use std::process::Command;
 
 #[derive(Component)]
@@ -33,7 +33,7 @@ pub fn button_mods_folder_step(
 ) {
     if button.just_pressed {
         Command::new("explorer")
-            .arg(appdata_path("Void_War\\mods")) 
+            .arg(vwdata_path("mods")) 
             .spawn()
             .unwrap();
     }

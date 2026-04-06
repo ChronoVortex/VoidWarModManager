@@ -22,6 +22,12 @@ pub fn appdata_path(path: &str) -> String {
     return String::from(dir.to_str().unwrap_or(path));
 }
 
+pub fn vwdata_path(path: &str) -> String {
+    let mut ret = appdata_path("Void_War\\");
+    ret.push_str(path);
+    return ret;
+}
+
 pub fn run_program(path: &str) -> bool {
     unsafe {
         return ex_run_program(CString::new(path).unwrap().into_raw()) > 0;

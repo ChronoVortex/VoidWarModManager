@@ -40,15 +40,17 @@ pub fn button_patch_step(
             let lib = Library::new("ModManLib.dll").expect("Could not load ModManLib.dll");
             let ex_install_project: Symbol<unsafe extern "C" fn(data_path: *const c_char, proj_path: *const c_char)> =
                 lib.get(b"EX_ModmanInstallMod\0").expect("Could not load the function EX_ModmanInstallMod");
-            let data_dir = CString::new(local_path("data.win")).unwrap();
+            let data_path = CString::new(local_path("data.win")).unwrap();
 
             // Patch selected mods in order of index
             for (mod_entry, children) in mod_entry_query.iter().sort_by_key::<&ModEntry, _>(|mod_entry| mod_entry.index) {
                 for child in children.iter() {
                     if let Ok(button_toggle) = button_toggle_query.get(child) {
                         if button_toggle.toggle_on {
-                            let mod_dir = CString::new(mod_entry.path.as_str()).unwrap();
-                            ex_install_project(data_dir.as_ptr(), mod_dir.as_ptr());
+                            let mut mod_path = mod_entry.path.clone();
+                            mod_path.push_str("\\project.json");
+                            let mod_path_c = CString::new(mod_path.as_str()).unwrap();
+                            ex_install_project(data_path.as_ptr(), mod_path_c.as_ptr());
                         }
                         break;
                     }
