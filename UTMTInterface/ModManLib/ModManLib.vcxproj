@@ -25,7 +25,7 @@
     <Keyword>NetCoreCProj</Keyword>
     <RootNamespace>ModManLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ModManDir>$(SolutionDir)..\ModManager\</ModManDir>
   </PropertyGroup>
@@ -125,24 +125,24 @@ move "$(TargetDir)$(ProjectName).runtimeconfig.json" "$(ModManDir)"</Command>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Reference Include="Underanalyzer">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net8.0\Underanalyzer.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net10.0\Underanalyzer.dll</HintPath>
     </Reference>
     <Reference Include="UndertaleModLib">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net8.0\UndertaleModLib.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net10.0\UndertaleModLib.dll</HintPath>
     </Reference>
     <Reference Include="UndertaleProjectMan">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net8.0\UndertaleProjectMan.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Release\net10.0\UndertaleProjectMan.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Reference Include="Underanalyzer">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net8.0\Underanalyzer.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net10.0\Underanalyzer.dll</HintPath>
     </Reference>
     <Reference Include="UndertaleModLib">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net8.0\UndertaleModLib.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net10.0\UndertaleModLib.dll</HintPath>
     </Reference>
     <Reference Include="UndertaleProjectMan">
-      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net8.0\UndertaleProjectMan.dll</HintPath>
+      <HintPath>..\UndertaleProjectMan\bin\x64\Debug\net10.0\UndertaleProjectMan.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
