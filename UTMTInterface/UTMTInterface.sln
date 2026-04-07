@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleProjectMan", "UndertaleProjectMan\UndertaleProjectMan.csproj", "{5FEB855D-472D-4459-BF4B-86FE6775E6AE}"
 EndProject
@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModManLib", "ModManLib\ModM
 	ProjectSection(ProjectDependencies) = postProject
 		{5FEB855D-472D-4459-BF4B-86FE6775E6AE} = {5FEB855D-472D-4459-BF4B-86FE6775E6AE}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLib", "..\UndertaleModTool\UndertaleModLib\UndertaleModLib.csproj", "{E951C5D0-7F88-3665-384B-A364719BFD9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Underanalyzer", "..\UndertaleModTool\Underanalyzer\Underanalyzer\Underanalyzer.csproj", "{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +48,30 @@ Global
 		{DA6D3358-8581-44BF-B2D4-5354E4622985}.Release|x64.Build.0 = Release|x64
 		{DA6D3358-8581-44BF-B2D4-5354E4622985}.Release|x86.ActiveCfg = Release|Win32
 		{DA6D3358-8581-44BF-B2D4-5354E4622985}.Release|x86.Build.0 = Release|Win32
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|x64.ActiveCfg = Debug|x64
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|x64.Build.0 = Debug|x64
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Debug|x86.Build.0 = Debug|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|x64.ActiveCfg = Release|x64
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|x64.Build.0 = Release|x64
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|x86.ActiveCfg = Release|Any CPU
+		{E951C5D0-7F88-3665-384B-A364719BFD9D}.Release|x86.Build.0 = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|x64.Build.0 = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Debug|x86.Build.0 = Debug|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|x64.ActiveCfg = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|x64.Build.0 = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|x86.ActiveCfg = Release|Any CPU
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

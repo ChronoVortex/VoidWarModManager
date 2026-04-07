@@ -1,4 +1,6 @@
-﻿using UndertaleModLib;
+﻿using System;
+using System.IO;
+using UndertaleModLib;
 using UndertaleModLib.Project;
 
 namespace UndertaleProjectMan
