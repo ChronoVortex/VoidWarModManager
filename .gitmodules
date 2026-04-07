@@ -1,4 +1,4 @@
 [submodule "UndertaleModTool"]
-    path = UndertaleModTool
-    url = https://github.com/UnderminersTeam/UndertaleModTool.git
+	path = UndertaleModTool
+	url = https://github.com/UnderminersTeam/UndertaleModTool.git
     branch = project-system
