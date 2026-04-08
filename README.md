@@ -12,7 +12,7 @@ git submodule update --init --recursive
 
 This project is designed to be built in [Visual Studio Code](https://code.visualstudio.com/) using the `run-release.bat` and `run-debug.bat` build scripts. Before building, you'll need to install [Rust](https://rust-lang.org/) and [Visual Studio 18+](https://visualstudio.microsoft.com/) with build tools for .NET 10 and C++. It is also reccomended to install the `rust-analyzer` extension in VSCode.
 
-In order to automatically build `UTMTInterface` automatically when using the VSCode build scripts in `ModManager`, you'll need to add `msbuild` to your Path environment variable. Press the Windows key, type "Edit the system environment variables" and press enter. Click "Environment Variables...", double-click the Path system variable and click "New". For the community edition of Visual Studio 18, this should be the directory containing `MSBuild.exe`:
+In order to build `UTMTInterface` automatically when using the VSCode build scripts in `ModManager`, you'll need to add `msbuild` to your Path environment variable. Press the Windows key, type "Edit the system environment variables" and press enter. Click "Environment Variables...", double-click the Path system variable and click "New". For the community edition of Visual Studio 18, this should be the directory containing `MSBuild.exe`:
 
 ```
 C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin
