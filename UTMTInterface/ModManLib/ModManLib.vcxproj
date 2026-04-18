@@ -81,6 +81,10 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/AI "$(SolutionDir)UndertaleProjectMan\bin\x64\Release\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\x64\Debug\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\Release\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\Debug\net10.0" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -109,6 +113,10 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/AI "$(SolutionDir)UndertaleProjectMan\bin\x64\Release\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\x64\Debug\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\Release\net10.0"
+/AI "$(SolutionDir)UndertaleProjectMan\bin\Debug\net10.0" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies />

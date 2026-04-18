@@ -1,4 +1,4 @@
-#include <filesystem>
+#using "UndertaleProjectMan.dll"
 
 #define EXPORT_SPEC extern "C" __declspec(dllexport)
 #define MANAGED_STR(pString) System::Runtime::InteropServices::Marshal::PtrToStringAnsi(System::IntPtr((char*)pString))
