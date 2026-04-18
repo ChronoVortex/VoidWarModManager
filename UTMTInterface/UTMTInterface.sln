@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 18.4.11626.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleProjectMan", "UndertaleProjectMan\UndertaleProjectMan.csproj", "{5FEB855D-472D-4459-BF4B-86FE6775E6AE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{94EEA675-FCAF-0D98-EE4E-8F12CE3024DA} = {94EEA675-FCAF-0D98-EE4E-8F12CE3024DA}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModManLib", "ModManLib\ModManLib.vcxproj", "{DA6D3358-8581-44BF-B2D4-5354E4622985}"
 	ProjectSection(ProjectDependencies) = postProject
