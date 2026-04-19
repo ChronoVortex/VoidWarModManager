@@ -2256,6 +2256,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "dotbridge"
+version = "0.1.0"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+dependencies = [
+ "dotbridge-derive",
+ "dotbridge-sys",
+ "thiserror 2.0.15",
+ "tokio",
+]
+
+[[package]]
+name = "dotbridge-derive"
+version = "0.1.0"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "dotbridge-sys"
+version = "0.1.0"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+dependencies = [
+ "libloading",
+ "thiserror 2.0.15",
+]
+
+[[package]]
 name = "downcast-rs"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3584,12 +3614,14 @@ dependencies = [
  "cc",
  "copy_to_output",
  "directories",
+ "dotbridge",
  "image",
  "libloading",
  "rfd",
  "serde",
  "serde-this-or-that",
  "serde_json",
+ "tokio",
  "windows-icons",
  "winit",
  "winreg",
@@ -5429,6 +5461,27 @@ name = "tinyvec_macros"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
+name = "tokio"
+version = "1.52.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b67dee974fe86fd92cc45b7a95fdd2f99a36a6d7b0d431a231178d3d670bbcc6"
+dependencies = [
+ "pin-project-lite",
+ "tokio-macros",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "385a6cb71ab9ab790c5fe8d67f1645e6c450a7ce006a33de03daa956cf70a496"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "toml"

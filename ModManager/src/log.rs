@@ -36,6 +36,10 @@ impl LogManager {
             color.unwrap_or(Color::srgb_u8(155, 153, 139))
         ));
     }
+
+    pub fn log_export_only(&mut self, string: String) {
+        self.strings.push(string);
+    }
 }
 
 #[derive(Component)]

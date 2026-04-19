@@ -47,12 +47,12 @@ namespace UndertaleProjectMan
             }
         }
 
-        public void InstallProject(string dataPath, string projectPath)
+        public void InstallProject(dynamic input)
         {
-            ReadDataFile(dataPath);
-            ProjectContext project = ProjectContext.CreateWithDataFilePaths(dataPath, dataPath, projectPath);
+            ReadDataFile(input.dataPath);
+            ProjectContext project = ProjectContext.CreateWithDataFilePaths(input.dataPath, input.dataPath, input.projectPath);
             project.Import(Data, new GameFileNoOpBackup());
-            SaveDataFile(dataPath);
+            SaveDataFile(input.dataPath);
         }
     }
 }

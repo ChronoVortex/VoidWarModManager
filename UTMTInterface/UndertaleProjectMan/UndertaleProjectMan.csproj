@@ -4,10 +4,23 @@
     <TargetFramework>net10.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+  
+  <PropertyGroup Label="Globals">
+    <ModManDir>$(SolutionDir)..\ModManager\</ModManDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.CppCLI.LoadComponentInIsolatedContext" Value="true" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\UndertaleModTool\UndertaleModLib\UndertaleModLib.csproj" />
   </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="move &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(ModManDir)&quot;&#xD;&#xA;move &quot;$(TargetDir)*.dll&quot; &quot;$(ModManDir)&quot;&#xD;&#xA;move &quot;$(TargetDir)runtimes\win-x64\native\Magick.Native-Q8-x64.dll&quot; &quot;$(ModManDir)&quot;" />
+  </Target>
 
 </Project>
