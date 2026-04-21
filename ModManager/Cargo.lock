@@ -2258,7 +2258,7 @@ dependencies = [
 [[package]]
 name = "dotbridge"
 version = "0.1.0"
-source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#fa8fb89add3829ce0216c306c2bbf4c577d475ba"
 dependencies = [
  "dotbridge-derive",
  "dotbridge-sys",
@@ -2269,7 +2269,7 @@ dependencies = [
 [[package]]
 name = "dotbridge-derive"
 version = "0.1.0"
-source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#fa8fb89add3829ce0216c306c2bbf4c577d475ba"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2279,7 +2279,7 @@ dependencies = [
 [[package]]
 name = "dotbridge-sys"
 version = "0.1.0"
-source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#9aae5581b581f0e6dfaf24c669b206982688d137"
+source = "git+https://github.com/ChronoVortex/dotbridge-rs.git?branch=net10#fa8fb89add3829ce0216c306c2bbf4c577d475ba"
 dependencies = [
  "libloading",
  "thiserror 2.0.15",

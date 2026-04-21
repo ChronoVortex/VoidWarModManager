@@ -61,7 +61,7 @@ pub fn button_patch_step(
                             }
                             Err(DotBridgeError::DotNetException { message, stack_trace }) => {
                                 log_man.log(format!("Patching {mod_name} failed"), Some(RED.into()));
-                                log_man.log("Export for full error".to_string(), None);
+                                log_man.log("Export log for full error".to_string(), None);
                                 log_man.log_export_only(message);
                                 if let Some(trace) = stack_trace {
                                     log_man.log_export_only(format!("Stack trace:\n{trace}"));
@@ -70,7 +70,7 @@ pub fn button_patch_step(
                             }
                             Err(e) => {
                                 log_man.log(format!("Patching {mod_name} failed"), Some(RED.into()));
-                                log_man.log("Export for full error".to_string(), None);
+                                log_man.log("Export log for full error".to_string(), None);
                                 log_man.log_export_only(e.to_string());
                                 return;
                             }
